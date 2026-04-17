@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+body{background:#fdf9f1;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh}
+.container{text-align:center;width:100%;max-width:600px}
+h1{font-size:48px}
+button{padding:14px;background:#000;color:#fff;border:2px solid #000;width:100%;margin-top:10px}
+</style></head>
+<body>
+<div class="container">
+<h1 id="timer">60</h1>
+<button onclick="start()">Start Speaking</button>
+<button onclick="stop()">Pause</button>
+<button onclick="finish()">Finish</button>
+</div>
+
+<script>
+let rec;
+
+// reflect selected time immediately
+let duration = parseInt(localStorage.getItem("time") || 60);
+document.getElementById("timer").innerText = duration;
+
+function start(){
+ let t = duration;
+
+ rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+ rec.lang="en-US";
+ rec.continuous=true;
+ rec.onresult=e=>{
+  let text="";
+  for(let i=0;i<e.results.length;i++){
+    text+=e.results[i][0].transcript+" ";
+  }
+  localStorage.setItem("speech",text);
+ };
+ rec.start();
+
+ window.timerInt=setInterval(()=>{
+  t--;
+  timer.innerText=t;
+  if(t<=0) finish();
+ },1000);
+}
+
+function stop(){
+ if(rec) rec.stop();
+ clearInterval(timerInt);
+}
+
+function finish(){
+ if(rec) rec.stop();
+ clearInterval(timerInt);
+ location.href="review.html";
+}
+</script>
+</body></html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+body{background:#fdf9f1;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh}
+.container{text-align:center;width:100%;max-width:600px}
+h2{font-size:32px}
+h1{font-size:48px}
+button{padding:14px;background:#000;color:#fff;border:2px solid #000;width:100%;margin-top:10px}
+select{width:100%;padding:10px;margin-bottom:10px}
+</style></head>
+<body>
+<div class="container">
+<h2 id="topic"></h2>
+
+<select id="time">
+<option value="30">30 sec</option>
+<option value="60">60 sec</option>
+<option value="90">90 sec</option>
+</select>
+
+<h1 id="timer">60</h1>
+
+<button onclick="start()">Think</button>
+<button onclick="next()">Next</button>
+</div>
+
+<script>
+document.getElementById("topic").innerText=localStorage.getItem("topic");
+
+// load saved time
+let saved = localStorage.getItem("time") || 60;
+document.getElementById("time").value = saved;
+document.getElementById("timer").innerText = saved;
+
+// update instantly when changed
+document.getElementById("time").onchange = function(){
+ localStorage.setItem("time", this.value);
+ document.getElementById("timer").innerText = this.value;
+};
+
+function start(){
+ let t = parseInt(localStorage.getItem("time") || 60);
+ let i=setInterval(()=>{
+  t--;
+  timer.innerText=t;
+  if(t<=0) clearInterval(i);
+ },1000);
+}
+
+function next(){location.href="speak.html";}
+</script>
+</body></html>

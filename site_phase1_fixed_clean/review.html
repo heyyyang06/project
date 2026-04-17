@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+body{background:#fdf9f1;padding:30px;font-family:sans-serif}
+.box{border:2px solid #000;padding:15px;margin-bottom:20px}
+.sentence{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #ccc}
+button{padding:14px;background:#000;color:#fff;border:2px solid #000;width:100%;margin-top:10px}
+</style></head>
+<body>
+
+<div class="box">
+<h3>Your Speech</h3>
+<p id="text"></p>
+</div>
+
+<div class="box">
+<h3>Sentence Feedback</h3>
+<div id="analysis"></div>
+</div>
+
+<button onclick="showMap()">Expand Ideas</button>
+<div class="box" id="mind" style="display:none"></div>
+
+<button onclick="restart()">Restart</button>
+
+<script>
+let text=localStorage.getItem("speech")||"";
+document.getElementById("text").innerText=text;
+
+let sentences=text.split(/[.!?]/).filter(s=>s.trim()!=="");
+let c=document.getElementById("analysis");
+
+sentences.forEach(s=>{
+ let o=s.trim();
+ let i=o.replace(/I think/gi,"Personally, I think")
+        .replace(/very/gi,"really")
+        .replace(/because/gi,"mainly because");
+
+ let d=document.createElement("div");
+ d.className="sentence";
+ d.innerHTML="<b>Original:</b> "+o+"<br><b>Better:</b> "+i;
+ c.appendChild(d);
+});
+
+const map={
+Travel:["Culture","Growth","Environment"],
+Success:["Growth","Money","Happiness"],
+AI:["Automation","Jobs","Ethics"],
+Health:["Exercise","Diet","Sleep"]
+};
+
+function showMap(){
+ let topic=localStorage.getItem("topic");
+ let arr=map[topic]||["Idea1","Idea2","Idea3"];
+ let html="<h3>Mind Map</h3><ul>";
+ arr.forEach(i=>html+="<li>"+i+"</li>");
+ html+="</ul>";
+ document.getElementById("mind").innerHTML=html;
+ document.getElementById("mind").style.display="block";
+}
+
+function restart(){location.href="index.html";}
+</script>
+
+</body></html>
