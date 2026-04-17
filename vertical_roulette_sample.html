@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Vertical Roulette Sample</title>
+<style>
+body{
+    margin:0;
+    background:#fdf9f1;
+    color:#000;
+    font-family:sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.container{
+    text-align:center;
+}
+.roulette{
+    height:120px;
+    overflow:hidden;
+    border:2px solid #000;
+    width:300px;
+    margin:20px auto;
+    position:relative;
+}
+.list{
+    position:absolute;
+    width:100%;
+    transition:transform 2s ease-out;
+}
+.item{
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+}
+.highlight{
+    position:absolute;
+    top:40px;
+    height:40px;
+    width:100%;
+    border-top:2px solid #000;
+    border-bottom:2px solid #000;
+    pointer-events:none;
+}
+button{
+    border:2px solid #000;
+    background:#000;
+    color:#fff;
+    padding:10px 20px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Topic Roulette</h2>
+
+    <div class="roulette">
+        <div class="list" id="list"></div>
+        <div class="highlight"></div>
+    </div>
+
+    <button onclick="spin()">돌리기</button>
+    <p id="result"></p>
+</div>
+
+<script>
+const topics = [
+"Travel","Success","AI","Health","Education",
+"Technology","Friendship","Money","Competition","Social Media"
+];
+
+const list = document.getElementById("list");
+
+// 리스트 3번 반복 (자연스럽게 돌리기)
+let extended = [...topics, ...topics, ...topics];
+
+extended.forEach(t=>{
+    const div = document.createElement("div");
+    div.className="item";
+    div.innerText=t;
+    list.appendChild(div);
+});
+
+function spin(){
+    const itemHeight = 40;
+    const randomIndex = Math.floor(Math.random()*topics.length) + topics.length;
+    const offset = randomIndex * itemHeight;
+
+    list.style.transform = `translateY(-${offset}px)`;
+
+    setTimeout(()=>{
+        const selected = extended[randomIndex];
+        document.getElementById("result").innerText = "선택: " + selected;
+    },2000);
+}
+</script>
+
+</body>
+</html>
