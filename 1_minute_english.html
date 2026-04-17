@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-Minute English Roulette</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #111111;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    .card {
+      border: 1px solid #e5e5e5;
+      border-radius: 20px;
+      padding: 25px;
+      background: #fafafa;
+    }
+    .roulette-wrap {
+      text-align: center;
+    }
+    canvas {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 50%;
+      border: 8px solid #111;
+      margin-top: 10px;
+      transition: transform 4s ease-out;
+    }
+    .pointer {
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 20px solid #111;
+      margin: 0 auto;
+    }
+    .topic-box {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+    button {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #111;
+      background: #111;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+    button.secondary {
+      background: white;
+      color: #111;
+    }
+    button:disabled {
+      background: #ccc;
+      border-color: #ccc;
+      cursor: not-allowed;
+    }
+    .timer {
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px 0 20px 0;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>1-Minute English</h1>
+    <div class="subtitle">Random topic → 1 min thinking → 1 min speaking</div>
+
+    <div class="layout">
+      <div class="card roulette-wrap">
+        <div class="pointer"></div>
+        <canvas id="wheelCanvas" width="600" height="600"></canvas>
+        <div class="topic-box" id="selectedTopic">룰렛을 돌려 주제를 선택하세요</div>
+        <button id="spinBtn">룰렛 돌리기</button>
+        <button id="rerollBtn" class="secondary">다시 뽑기</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">1. 생각 정리 1분</div>
+        <div class="timer" id="prepTimer">01:00</div>
+        <button id="prepBtn" disabled>생각 정리 시작</button>
+
+        <div class="section-title" style="margin-top:30px;">2. 1분 말하기</div>
+        <div class="timer" id="speakTimer">01:00</div>
+        <button id="startBtn" disabled>말하기 시작</button>
+        <button id="stopBtn" class="secondary" disabled>녹음 중지</button>
+
+        <audio id="audioPlayer" controls></audio>
+
+        <button id="resetBtn" class="secondary" style="margin-top:20px;">전체 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const topics = [
+      "If you could live in any country for one year, where would you go and why?",
+      "What daily habit improved your life the most?",
+      "Is social media helpful or harmful?",
+      "What book or movie changed your thinking?",
+      "Should students learn more practical skills?",
+      "What makes a city a good place to live?",
+      "Money vs Free time — which is better?",
+      "How is AI changing our life?",
+      "A problem in society you want to solve",
+      "Why do people travel?",
+      "What is success?",
+      "Should animals be in zoos?",
+      "Best way to make friends",
+      "How to stay healthy",
+      "A tradition from your country",
+      "Is competition good?",
+      "A skill everyone needs",
+      "Technology and education",
+      "A place that makes you calm",
+      "Planning vs spontaneous life"
+    ];
+
+    const canvas = document.getElementById("wheelCanvas");
+    const ctx = canvas.getContext("2d");
+    const spinBtn = document.getElementById("spinBtn");
+    const rerollBtn = document.getElementById("rerollBtn");
+    const prepBtn = document.getElementById("prepBtn");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const selectedTopic = document.getElementById("selectedTopic");
+    const prepTimer = document.getElementById("prepTimer");
+    const speakTimer = document.getElementById("speakTimer");
+    const audioPlayer = document.getElementById("audioPlayer");
+
+    let rotation = 0;
+    let currentTopic = "";
+    let prepInterval, speakInterval;
+    let mediaRecorder, audioChunks = [];
+
+    function drawWheel() {
+      const center = canvas.width / 2;
+      const radius = center;
+      const angle = (2 * Math.PI) / topics.length;
+
+      for (let i = 0; i < topics.length; i++) {
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, i * angle, (i + 1) * angle);
+        ctx.fillStyle = i % 2 === 0 ? "#111" : "#999";
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(center, center);
+        ctx.rotate(i * angle + angle / 2);
+        ctx.fillStyle = "white";
+        ctx.font = "14px sans-serif";
+        ctx.fillText(topics[i].substring(0, 18) + "...", radius - 10, 0);
+        ctx.restore();
+      }
+    }
+
+    drawWheel();
+
+    function spinWheel() {
+      const spin = Math.floor(Math.random() * 360 + 720);
+      rotation += spin;
+      canvas.style.transform = `rotate(${rotation}deg)`;
+
+      setTimeout(() => {
+        const index = Math.floor((topics.length - (rotation % 360) / (360 / topics.length)) % topics.length);
+        currentTopic = topics[index];
+        selectedTopic.textContent = currentTopic;
+        prepBtn.disabled = false;
+      }, 4000);
+    }
+
+    spinBtn.onclick = spinWheel;
+    rerollBtn.onclick = spinWheel;
+
+    function startPrep() {
+      let time = 60;
+      prepBtn.disabled = true;
+      prepInterval = setInterval(() => {
+        time--;
+        prepTimer.textContent = "00:" + (time < 10 ? "0" + time : time);
+        if (time <= 0) {
+          clearInterval(prepInterval);
+          startBtn.disabled = false;
+        }
+      }, 1000);
+    }
+
+    prepBtn.onclick = startPrep;
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks);
+        audioPlayer.src = URL.createObjectURL(blob);
+      };
+
+      mediaRecorder.start();
+
+      let time = 60;
+      speakInterval = setInterval(() => {
+        time--;
+        speakTimer.textContent = "00:" + (time < 10 ? "0" + time : time);
+        if (time <= 0) stopRecording();
+      }, 1000);
+    }
+
+    function stopRecording() {
+      clearInterval(speakInterval);
+      mediaRecorder.stop();
+      stopBtn.disabled = true;
+    }
+
+    startBtn.onclick = () => {
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      startRecording();
+    };
+
+    stopBtn.onclick = stopRecording;
+
+    resetBtn.onclick = () => location.reload();
+  </script>
+</body>
+</html>

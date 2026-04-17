@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-Minute English — With Review Log</title>
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+      color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 30px 20px 60px;
+    }
+    h1 {
+      font-size: 42px;
+      margin-bottom: 5px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      border: 2px solid #000;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #000;
+      background: #000;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button.secondary {
+      background: #fff;
+      color: #000;
+    }
+    .box {
+      border: 2px solid #000;
+      padding: 15px;
+      min-height: 100px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+    .word {
+      cursor: pointer;
+      padding: 2px 4px;
+      display: inline-block;
+    }
+    .word:hover {
+      background: #000;
+      color: #fff;
+    }
+    canvas {
+      width: 100%;
+      border: 4px solid #000;
+      border-radius: 50%;
+    }
+    .timer {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>1-Minute English</h1>
+  <p>룰렛 → 생각 1분 → 말하기 1분 → 텍스트 & 피드백 → 단어 저장 → 복습</p>
+
+  <div class="layout">
+    <div>
+      <div class="card">
+        <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        <div class="box" id="topic">룰렛을 돌려주세요</div>
+        <button id="spinBtn">룰렛 돌리기</button>
+      </div>
+
+      <div class="card">
+        <div>생각 정리</div>
+        <div class="timer" id="prepTimer">01:00</div>
+        <button id="prepBtn" disabled>생각 정리 시작</button>
+
+        <div style="margin-top:20px;">말하기</div>
+        <div class="timer" id="speakTimer">01:00</div>
+        <button id="startBtn" disabled>말하기 시작</button>
+        <button id="stopBtn" class="secondary" disabled>녹음 중지</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div>내가 말한 내용 (단어 클릭 → 저장)</div>
+        <div class="box" id="transcript"></div>
+      </div>
+
+      <div class="card">
+        <div>원어민 표현 추천 (단어 클릭 → 저장)</div>
+        <div class="box" id="feedback"></div>
+      </div>
+
+      <div class="card">
+        <div>오늘의 복습 단어</div>
+        <div class="box" id="savedWords"></div>
+        <button class="secondary" onclick="clearWords()">단어 초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const topics = [
+ "What is success?",
+ "Why do people travel?",
+ "How is AI changing life?",
+ "Best way to make friends",
+ "Money vs Free time",
+ "A place you love",
+ "A skill everyone needs",
+ "Your favorite book or movie",
+ "Is social media good?",
+ "A problem in society"
+];
+
+const canvas = document.getElementById("wheelCanvas");
+const ctx = canvas.getContext("2d");
+const spinBtn = document.getElementById("spinBtn");
+const prepBtn = document.getElementById("prepBtn");
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+
+const topicBox = document.getElementById("topic");
+const prepTimer = document.getElementById("prepTimer");
+const speakTimer = document.getElementById("speakTimer");
+const transcriptBox = document.getElementById("transcript");
+const feedbackBox = document.getElementById("feedback");
+const savedWordsBox = document.getElementById("savedWords");
+
+let rotation = 0;
+let prepInterval, speakInterval;
+let recognition;
+let savedWords = JSON.parse(localStorage.getItem("savedWords") || "[]");
+
+function drawWheel() {
+  const center = canvas.width / 2;
+  const radius = center;
+  const angle = (2 * Math.PI) / topics.length;
+
+  for (let i = 0; i < topics.length; i++) {
+    ctx.beginPath();
+    ctx.moveTo(center, center);
+    ctx.arc(center, center, radius, i * angle, (i + 1) * angle);
+    ctx.fillStyle = i % 2 === 0 ? "#000" : "#fff";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(i * angle + angle / 2);
+    ctx.fillStyle = i % 2 === 0 ? "#fff" : "#000";
+    ctx.font = "16px Arial";
+    ctx.fillText(topics[i], radius - 20, 0);
+    ctx.restore();
+  }
+}
+drawWheel();
+
+spinBtn.onclick = () => {
+  const spin = Math.floor(Math.random() * 360 + 720);
+  rotation += spin;
+  canvas.style.transform = `rotate(${rotation}deg)`;
+
+  setTimeout(() => {
+    const index = Math.floor(Math.random() * topics.length);
+    topicBox.textContent = topics[index];
+    prepBtn.disabled = false;
+  }, 3000);
+};
+
+prepBtn.onclick = () => {
+  let time = 60;
+  prepInterval = setInterval(() => {
+    time--;
+    prepTimer.textContent = "00:" + (time < 10 ? "0" + time : time);
+    if (time <= 0) {
+      clearInterval(prepInterval);
+      startBtn.disabled = false;
+    }
+  }, 1000);
+};
+
+startBtn.onclick = () => {
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+
+  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-US";
+  recognition.continuous = true;
+  recognition.onresult = (e) => {
+    let text = "";
+    for (let i = 0; i < e.results.length; i++) {
+      text += e.results[i][0].transcript + " ";
+    }
+    displayClickableText(text, transcriptBox);
+    generateFeedback(text);
+  };
+  recognition.start();
+
+  let time = 60;
+  speakInterval = setInterval(() => {
+    time--;
+    speakTimer.textContent = "00:" + (time < 10 ? "0" + time : time);
+    if (time <= 0) stopRecording();
+  }, 1000);
+};
+
+stopBtn.onclick = stopRecording;
+
+function stopRecording() {
+  clearInterval(speakInterval);
+  if (recognition) recognition.stop();
+}
+
+function displayClickableText(text, element) {
+  element.innerHTML = "";
+  text.split(" ").forEach(word => {
+    const span = document.createElement("span");
+    span.textContent = word + " ";
+    span.className = "word";
+    span.onclick = () => saveWord(word);
+    element.appendChild(span);
+  });
+}
+
+function generateFeedback(text) {
+  const revised = text.replace(/I think/gi, "I'd say")
+                      .replace(/very/gi, "really")
+                      .replace(/because/gi, "mainly because");
+  displayClickableText(revised, feedbackBox);
+}
+
+function saveWord(word) {
+  if (!savedWords.includes(word)) {
+    savedWords.push(word);
+    localStorage.setItem("savedWords", JSON.stringify(savedWords));
+    renderSavedWords();
+  }
+}
+
+function renderSavedWords() {
+  savedWordsBox.innerHTML = savedWords.join(", ");
+}
+
+function clearWords() {
+  localStorage.removeItem("savedWords");
+  savedWords = [];
+  renderSavedWords();
+}
+
+renderSavedWords();
+</script>
+</body>
+</html>
