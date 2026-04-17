@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Speak</title></head>
+<body style="font-family:sans-serif">
+<h1>1분 말하기</h1>
+<h2 id="timer">60</h2>
+<button onclick="start()">말하기 시작</button>
+
+<script>
+function start(){
+  let t=60;
+  const i=setInterval(()=>{
+    t--;
+    document.getElementById("timer").innerText=t;
+    if(t<=0) clearInterval(i);
+  },1000);
+}
+</script>
+</body></html>

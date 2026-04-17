@@ -1,0 +1,19 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Topic</title></head>
+<body style="font-family:sans-serif">
+<h1>Topic Roulette</h1>
+<button onclick="spin()">룰렛 돌리기</button>
+<p id="topic"></p>
+<button onclick="goNext()">생각 정리 시작</button>
+
+<script>
+const topics = ["Success","Travel","AI","Friends","Health","Education"];
+function spin(){
+  const t = topics[Math.floor(Math.random()*topics.length)];
+  localStorage.setItem("topic", t);
+  document.getElementById("topic").innerText = t;
+}
+function goNext(){
+  location.href="prep.html";
+}
+</script>
+</body></html>

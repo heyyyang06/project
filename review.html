@@ -1,0 +1,24 @@
+
+<!DOCTYPE html><html><head><meta charset="UTF-8"><link rel="stylesheet" href="style.css"></head>
+<body><div class="container"><div class="card">
+<h2>생각 확장</h2>
+<p id="mind"></p>
+<button onclick="saveWord()">단어 저장</button>
+<button onclick="restart()">다시 시작</button>
+</div></div>
+<script>
+const map={
+Travel:"문화, 성장, 환경",
+Success:"성장, 돈, 만족",
+AI:"자동화, 일자리, 윤리"
+};
+let topic=localStorage.getItem("topic");
+document.getElementById("mind").innerText=map[topic]||"생각 확장";
+function saveWord(){
+ let arr=JSON.parse(localStorage.getItem("words")||"[]");
+ arr.push(topic);
+ localStorage.setItem("words",JSON.stringify(arr));
+ alert("저장됨");
+}
+function restart(){location.href='index.html'}
+</script></body></html>
