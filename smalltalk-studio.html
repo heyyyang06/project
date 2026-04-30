@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmallTalk Studio — 영어 스몰토크 연습</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF8;
+    --bg-secondary: #F2F1ED;
+    --bg-tertiary: #ECEAE4;
+    --text: #1A1916;
+    --text-secondary: #6B6960;
+    --text-hint: #A09D96;
+    --border: rgba(26,25,22,0.1);
+    --border-md: rgba(26,25,22,0.18);
+    --accent: #1A1916;
+    --accent-inv: #FAFAF8;
+    --green: #1D9E75;
+    --green-bg: #EAF7F2;
+    --amber: #BA7517;
+    --amber-bg: #FDF3E0;
+    --red: #D94040;
+    --red-bg: #FDF0F0;
+    --blue: #185FA5;
+    --blue-bg: #EAF2FB;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ─────────────────────────────── */
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(250,250,248,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .logo span {
+    font-size: 12px;
+    color: var(--text-hint);
+    font-weight: 300;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .stat-pill {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-pill strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Tabs ────────────────────────────────── */
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.18s;
+    position: relative;
+  }
+
+  .tab.active {
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 500;
+    box-shadow: var(--shadow);
+  }
+
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .badge-new {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-left: 5px;
+    vertical-align: middle;
+    background: var(--red-bg);
+    color: var(--red);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Cards ───────────────────────────────── */
+
+  .card {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+  }
+
+  .card + .card { margin-top: 1rem; }
+
+  /* ── ROULETTE ────────────────────────────── */
+
+  .topic-display {
+    background: linear-gradient(135deg, #1A1916 0%, #2D2C29 100%);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .topic-display::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .topic-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .topic-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: white;
+    line-height: 1.45;
+    max-width: 520px;
+  }
+
+  .topic-hint {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 300;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .topic-display.animating .topic-text,
+  .topic-display.animating .topic-tag,
+  .topic-display.animating .topic-hint {
+    animation: fadeSlideUp 0.35s ease-out;
+  }
+
+  .spin-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .spin-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text);
+    color: var(--accent-inv);
+    border: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+
+  .spin-btn:hover { opacity: 0.82; }
+  .spin-btn:active { transform: scale(0.97); }
+
+  @keyframes spin-icon { from{transform:rotate(0deg)} to{transform:rotate(720deg)} }
+  .spin-btn.spinning .spin-icon { animation: spin-icon 0.55s cubic-bezier(0.4,0,0.2,1); }
+
+  .practice-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .practice-btn:hover { background: var(--bg-tertiary); }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .category-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .cat-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--border-md);
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .cat-btn:hover { border-color: var(--text); color: var(--text); }
+
+  .cat-btn.selected {
+    background: var(--text);
+    color: var(--accent-inv);
+    border-color: var(--text);
+  }
+
+  /* ── RECORDER ────────────────────────────── */
+
+  .topic-mini {
+    padding: 1rem 1.25rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .topic-mini strong {
+    display: block;
+    font-size: 16px;
+    color: var(--text);
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .timer-area {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .timer-display {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 56px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: var(--text);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .timer-display.recording { color: var(--red); }
+
+  .timer-sub {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .waveform {
+    height: 56px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0 1rem;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .wave-bar {
+    width: 3px;
+    background: var(--border-md);
+    border-radius: 2px;
+    height: 6px;
+    transition: height 0.08s;
+  }
+
+  @keyframes wave-anim {
+    0%, 100% { height: 6px; }
+    50% { height: 36px; }
+  }
+
+  .waveform.recording .wave-bar {
+    background: var(--red);
+    animation: wave-anim 0.8s ease-in-out infinite;
+  }
+
+  .waveform.recording .wave-bar:nth-child(2n)  { animation-delay: 0.08s; }
+  .waveform.recording .wave-bar:nth-child(3n)  { animation-delay: 0.16s; }
+  .waveform.recording .wave-bar:nth-child(4n)  { animation-delay: 0.24s; }
+  .waveform.recording .wave-bar:nth-child(5n)  { animation-delay: 0.32s; }
+  .waveform.recording .wave-bar:nth-child(7n)  { animation-delay: 0.45s; }
+
+  .rec-controls {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .rec-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--border-md);
+    background: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+
+  .rec-btn.primary {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+    width: 64px; height: 64px;
+    box-shadow: 0 4px 16px rgba(217,64,64,0.3);
+  }
+
+  .rec-btn.primary.recording {
+    background: white;
+    color: var(--red);
+    box-shadow: 0 4px 16px rgba(217,64,64,0.15);
+  }
+
+  .rec-btn:hover:not(:disabled) { opacity: 0.75; transform: scale(1.05); }
+  .rec-btn:active:not(:disabled) { transform: scale(0.95); }
+  .rec-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .rec-status {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-hint);
+    margin-bottom: 1.5rem;
+  }
+
+  .transcript-box {
+    padding: 1rem 1.25rem;
+    background: var(--bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    min-height: 80px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-hint);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+
+  .transcript-box.has-text {
+    color: var(--text);
+    font-style: normal;
+  }
+
+  /* ── Buttons ─────────────────────────────── */
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 0.7rem;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border-md);
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { background: var(--bg-secondary); }
+
+  .btn.primary {
+    background: var(--text);
+    color: var(--accent-inv);
+    border-color: var(--text);
+  }
+
+  .btn.primary:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── FEEDBACK ────────────────────────────── */
+
+  .no-recording {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+
+  .no-recording p { margin-bottom: 0.5rem; }
+
+  .no-recording .btn {
+    display: inline-block;
+    flex: none;
+    margin-top: 1.25rem;
+    padding: 0.7rem 1.5rem;
+  }
+
+  .feedback-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 2rem;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+  .ld {
+    width: 8px; height: 8px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    animation: pulse-dot 1.2s infinite;
+  }
+  .ld:nth-child(2) { animation-delay: 0.2s; }
+  .ld:nth-child(3) { animation-delay: 0.4s; }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .score-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .score-label {
+    font-size: 11px;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .score-val {
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .score-sub {
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .good  { color: var(--green); }
+  .ok    { color: var(--amber); }
+  .needs { color: var(--red); }
+
+  .score-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .fill-good  { background: var(--green); }
+  .fill-ok    { background: var(--amber); }
+  .fill-needs { background: var(--red); }
+
+  .fb-section {
+    margin-bottom: 1rem;
+  }
+
+  .fb-section h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .fb-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .fb-section ul {
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fb-section li {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .fb-section li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-md);
+  }
+
+  .strength li::before { background: var(--green); }
+  .improve  li::before { background: var(--amber); }
+
+  .example-phrase {
+    background: var(--blue-bg);
+    border-left: 3px solid var(--blue);
+    padding: 10px 14px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 14px;
+    color: var(--blue);
+    margin-bottom: 8px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .next-topic {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1rem 1.25rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .next-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ── History chip ────────────────────────── */
+
+  .history-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0.25rem 0 0.75rem;
+    margin-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .history-strip::-webkit-scrollbar { display: none; }
+
+  .history-chip {
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Tips ────────────────────────────────── */
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    gap: 10px;
+    margin-top: 1rem;
+  }
+
+  .tip-card {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .tip-emoji { font-size: 18px; margin-bottom: 8px; }
+
+  .tip-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tip-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── Responsive ──────────────────────────── */
+
+  @media (max-width: 540px) {
+    .site-header { padding: 0 1rem; }
+    .header-stats { display: none; }
+    .main { padding: 1.25rem 1rem 3rem; }
+    .topic-text { font-size: 18px; }
+    .timer-display { font-size: 44px; }
+    .score-row { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .score-val { font-size: 26px; }
+    .spin-row { flex-direction: column; }
+    .spin-btn, .practice-btn { width: 100%; justify-content: center; }
+    .tips-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <h1>SmallTalk Studio</h1>
+    <span>영어 스몰토크 연습</span>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">오늘 세션: <strong id="sessionCount">0</strong>회</div>
+    <div class="stat-pill">총 연습: <strong id="totalCount">0</strong>회</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('roulette')">🎲 주제 뽑기</button>
+    <button class="tab" onclick="switchTab('record')">🎙 녹음 연습</button>
+    <button class="tab" onclick="switchTab('feedback')">✨ AI 피드백<span class="badge-new" id="feedbackBadge" style="display:none">New</span></button>
+  </div>
+
+  <!-- ═══ ROULETTE PANEL ═══ -->
+  <div class="panel active" id="panel-roulette">
+    <div class="topic-display" id="topicDisplay">
+      <div class="topic-tag" id="topicTag">Daily Life</div>
+      <div class="topic-text" id="topicText">What's your morning routine like?</div>
+      <div class="topic-hint" id="topicHint">Talk for 1–2 minutes about this topic</div>
+    </div>
+
+    <div class="spin-row">
+      <button class="spin-btn" id="spinBtn" onclick="spinTopic()">
+        <svg class="spin-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+          <path d="M16 16h5v5"/>
+        </svg>
+        새 주제 뽑기
+      </button>
+      <button class="practice-btn" onclick="goToRecord()">이 주제로 연습하기 →</button>
+    </div>
+
+    <p class="section-label">카테고리 필터</p>
+    <div class="category-grid" id="categoryGrid"></div>
+
+    <div id="historyWrap" style="display:none">
+      <p class="section-label">최근 연습 주제</p>
+      <div class="history-strip" id="historyStrip"></div>
+    </div>
+
+    <p class="section-label">스몰토크 팁</p>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-emoji">💡</div>
+        <div class="tip-title">구체적으로 말하기</div>
+        <div class="tip-desc">막연한 답변보다 "I usually wake up at 7 and..." 처럼 구체적인 예시를 들어보세요.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-emoji">🔄</div>
+        <div class="tip-title">질문으로 연결하기</div>
+        <div class="tip-desc">답변 후 "What about you?" 로 대화를 이어가는 습관을 만드세요.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-emoji">⏱</div>
+        <div class="tip-title">1~2분 목표</div>
+        <div class="tip-desc">너무 짧지도, 길지도 않게 1~2분을 목표로 말해보세요.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-emoji">😊</div>
+        <div class="tip-title">감정 표현 넣기</div>
+        <div class="tip-desc">"I really enjoy..." "It's kind of tricky..." 등 감정 표현이 대화를 풍부하게 합니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RECORD PANEL ═══ -->
+  <div class="panel" id="panel-record">
+    <div class="topic-mini">
+      현재 주제
+      <strong id="recordTopicText">What's your morning routine like?</strong>
+    </div>
+
+    <div class="timer-area">
+      <div class="timer-display" id="timerDisplay">0:00</div>
+      <div class="timer-sub" id="timerSub">준비 완료</div>
+    </div>
+
+    <div class="waveform" id="waveform"></div>
+
+    <div class="rec-controls">
+      <button class="rec-btn" id="playBtn" onclick="playRecording()" title="재생" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+      <button class="rec-btn primary" id="recBtn" onclick="toggleRecord()">
+        <svg id="recIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>
+      </button>
+      <button class="rec-btn" id="clearBtn" onclick="clearRecording()" title="삭제" disabled>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/></svg>
+      </button>
+    </div>
+
+    <div class="rec-status" id="recStatus">마이크 버튼을 눌러 녹음을 시작하세요</div>
+
+    <div class="transcript-box" id="transcriptBox">
+      녹음 후 여기에 음성 내용이 표시됩니다...
+    </div>
+
+    <div class="action-row">
+      <button class="btn" onclick="switchTab('roulette')">← 주제 다시 뽑기</button>
+      <button class="btn primary" id="getFeedbackBtn" onclick="requestFeedback()" disabled>AI 피드백 받기 →</button>
+    </div>
+  </div>
+
+  <!-- ═══ FEEDBACK PANEL ═══ -->
+  <div class="panel" id="panel-feedback">
+    <div id="feedbackContent">
+      <div class="no-recording">
+        <p style="font-size:32px;margin-bottom:0.5rem">🎙</p>
+        <p><strong>녹음 탭에서 먼저 연습해 보세요.</strong></p>
+        <p style="font-size:14px; color:var(--text-hint)">AI가 여러분의 영어 스몰토크를 분석하고<br>맞춤형 피드백을 드립니다.</p>
+        <button class="btn" onclick="switchTab('record')" style="display:inline-block;flex:none;margin-top:1.25rem;padding:0.7rem 1.5rem">녹음하러 가기</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const TOPICS = {
+  "Daily Life": [
+    { q: "What's your morning routine like?", h: "Talk for 1–2 minutes about this topic" },
+    { q: "How do you usually spend your weekends?", h: "Share your typical weekend activities" },
+    { q: "Do you prefer cooking at home or eating out?", h: "Give reasons for your preference" },
+    { q: "What's your favorite season and why?", h: "Describe what you enjoy about it" },
+    { q: "How do you relax after a long day?", h: "Talk about your wind-down routine" },
+    { q: "What does your ideal day off look like?", h: "Describe your perfect free day" },
+  ],
+  "Work & Career": [
+    { q: "What do you do for work? Do you enjoy it?", h: "Talk about your job or studies" },
+    { q: "What's your dream job and why?", h: "Describe your ideal career" },
+    { q: "Have you ever worked in a team? What was it like?", h: "Share a work or study experience" },
+    { q: "What skills do you think are most important today?", h: "Discuss 2–3 key skills" },
+    { q: "Do you prefer working alone or with others?", h: "Give reasons for your preference" },
+  ],
+  "Travel": [
+    { q: "Where's the most interesting place you've visited?", h: "Describe what made it memorable" },
+    { q: "Do you prefer adventure travel or relaxing vacations?", h: "Explain your travel style" },
+    { q: "What country would you love to visit someday?", h: "Talk about your travel bucket list" },
+    { q: "Have you ever had a travel mishap? What happened?", h: "Share a funny or difficult travel story" },
+    { q: "What do you always pack when you travel?", h: "Talk about your travel essentials" },
+  ],
+  "Food & Culture": [
+    { q: "What's your favorite food and how is it made?", h: "Describe the dish in detail" },
+    { q: "Have you tried food from another country? Did you like it?", h: "Share your experience" },
+    { q: "What's a food tradition in your culture?", h: "Talk about a special food or occasion" },
+    { q: "Are you a good cook? What can you make well?", h: "Talk about your cooking skills" },
+    { q: "What's a restaurant you'd recommend to a friend?", h: "Describe the place and what's good there" },
+  ],
+  "Tech & Trends": [
+    { q: "How has technology changed your daily life?", h: "Give specific examples" },
+    { q: "Do you use social media a lot? Which platforms?", h: "Talk about your online habits" },
+    { q: "What do you think about AI? Is it good or bad?", h: "Share your opinion with reasons" },
+    { q: "What's a gadget you can't live without?", h: "Explain why it's essential to you" },
+    { q: "Do you think working from home is better than the office?", h: "Share your view with examples" },
+  ],
+  "Random": [
+    { q: "If you could have any superpower, what would it be?", h: "Be creative and explain your choice" },
+    { q: "What's something you learned recently that surprised you?", h: "Share an interesting fact or skill" },
+    { q: "If you could live in any time period, when would it be?", h: "Describe your ideal era" },
+    { q: "What's the best piece of advice you've ever received?", h: "Talk about advice that impacted you" },
+    { q: "If you could have dinner with anyone — dead or alive — who would it be?", h: "Explain your choice" },
+    { q: "What's a hobby you'd love to pick up someday?", h: "Talk about something you've always wanted to try" },
+  ]
+};
+
+let selectedCategories = Object.keys(TOPICS);
+let currentTopic = TOPICS["Daily Life"][0];
+let currentTopicCat = "Daily Life";
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+let audioBlob = null;
+let timerInterval = null;
+let seconds = 0;
+let sessionCount = 0;
+let totalCount = parseInt(localStorage.getItem('st_total') || '0');
+let practiceHistory = JSON.parse(localStorage.getItem('st_history') || '[]');
+
+document.getElementById('totalCount').textContent = totalCount;
+updateHistoryUI();
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['roulette','record','feedback'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function buildCategoryGrid() {
+  const grid = document.getElementById('categoryGrid');
+  grid.innerHTML = '';
+  Object.keys(TOPICS).forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn selected';
+    btn.textContent = cat;
+    btn.onclick = () => {
+      btn.classList.toggle('selected');
+      if (btn.classList.contains('selected')) {
+        if (!selectedCategories.includes(cat)) selectedCategories.push(cat);
+      } else {
+        selectedCategories = selectedCategories.filter(c => c !== cat);
+        if (selectedCategories.length === 0) {
+          btn.classList.add('selected');
+          selectedCategories.push(cat);
+        }
+      }
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function spinTopic() {
+  const btn = document.getElementById('spinBtn');
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 600);
+
+  const pool = [];
+  selectedCategories.forEach(cat => {
+    if (TOPICS[cat]) TOPICS[cat].forEach(t => pool.push({ ...t, cat }));
+  });
+
+  let pick = pool[Math.floor(Math.random() * pool.length)];
+  // avoid same topic twice in a row
+  if (pool.length > 1 && pick.q === currentTopic.q) {
+    pick = pool[(pool.indexOf(pick) + 1) % pool.length];
+  }
+  currentTopic = pick;
+  currentTopicCat = pick.cat;
+
+  const disp = document.getElementById('topicDisplay');
+  disp.classList.add('animating');
+  setTimeout(() => disp.classList.remove('animating'), 400);
+
+  document.getElementById('topicTag').textContent = pick.cat;
+  document.getElementById('topicText').textContent = pick.q;
+  document.getElementById('topicHint').textContent = pick.h;
+}
+
+function goToRecord() {
+  document.getElementById('recordTopicText').textContent = currentTopic.q;
+  switchTab('record');
+}
+
+function buildWaveform() {
+  const wf = document.getElementById('waveform');
+  wf.innerHTML = '';
+  for (let i = 0; i < 44; i++) {
+    const b = document.createElement('div');
+    b.className = 'wave-bar';
+    wf.appendChild(b);
+  }
+}
+
+async function toggleRecord() {
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('clearBtn').disabled = false;
+        document.getElementById('getFeedbackBtn').disabled = false;
+        document.getElementById('recStatus').textContent = '녹음 완료! 재생하거나 AI 피드백을 받아보세요.';
+        document.getElementById('timerSub').textContent = '녹음 완료';
+        showTranscriptNote();
+        // stats
+        sessionCount++;
+        totalCount++;
+        document.getElementById('sessionCount').textContent = sessionCount;
+        document.getElementById('totalCount').textContent = totalCount;
+        localStorage.setItem('st_total', totalCount);
+        addHistory(currentTopic.q);
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      seconds = 0;
+      timerInterval = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        document.getElementById('timerDisplay').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+        document.getElementById('timerSub').textContent = '녹음 중...';
+      }, 1000);
+      document.getElementById('timerDisplay').classList.add('recording');
+      document.getElementById('waveform').classList.add('recording');
+      document.getElementById('recBtn').classList.add('recording');
+      document.getElementById('recIcon').innerHTML = '<rect x="5" y="5" width="14" height="14" rx="3"/>';
+      document.getElementById('recStatus').textContent = '● 녹음 중입니다. 버튼을 눌러 중지하세요.';
+    } catch (e) {
+      document.getElementById('recStatus').textContent = '⚠ 마이크 접근 권한이 필요합니다. 브라우저 설정을 확인해 주세요.';
+    }
+  } else {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    clearInterval(timerInterval);
+    document.getElementById('timerDisplay').classList.remove('recording');
+    document.getElementById('waveform').classList.remove('recording');
+    document.getElementById('recBtn').classList.remove('recording');
+    document.getElementById('recIcon').innerHTML = '<circle cx="12" cy="12" r="7"/>';
+  }
+}
+
+function showTranscriptNote() {
+  const box = document.getElementById('transcriptBox');
+  box.classList.add('has-text');
+  box.textContent = `"${currentTopic.q}" 주제로 ${formatTime(seconds)} 동안 녹음했습니다. AI 피드백 탭에서 분석을 받아보세요.`;
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m > 0 ? `${m}분 ${s}초` : `${s}초`;
+}
+
+function playRecording() {
+  if (!audioBlob) return;
+  const url = URL.createObjectURL(audioBlob);
+  const audio = new Audio(url);
+  audio.play();
+}
+
+function clearRecording() {
+  audioBlob = null;
+  audioChunks = [];
+  seconds = 0;
+  document.getElementById('timerDisplay').textContent = '0:00';
+  document.getElementById('timerDisplay').classList.remove('recording');
+  document.getElementById('timerSub').textContent = '준비 완료';
+  document.getElementById('waveform').classList.remove('recording');
+  document.getElementById('playBtn').disabled = true;
+  document.getElementById('clearBtn').disabled = true;
+  document.getElementById('getFeedbackBtn').disabled = true;
+  document.getElementById('recStatus').textContent = '마이크 버튼을 눌러 녹음을 시작하세요';
+  document.getElementById('transcriptBox').classList.remove('has-text');
+  document.getElementById('transcriptBox').textContent = '녹음 후 여기에 음성 내용이 표시됩니다...';
+}
+
+function addHistory(q) {
+  practiceHistory = [q, ...practiceHistory.filter(h => h !== q)].slice(0, 8);
+  localStorage.setItem('st_history', JSON.stringify(practiceHistory));
+  updateHistoryUI();
+}
+
+function updateHistoryUI() {
+  const wrap = document.getElementById('historyWrap');
+  const strip = document.getElementById('historyStrip');
+  if (practiceHistory.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  strip.innerHTML = '';
+  practiceHistory.forEach(q => {
+    const chip = document.createElement('div');
+    chip.className = 'history-chip';
+    chip.title = q;
+    chip.textContent = q;
+    strip.appendChild(chip);
+  });
+}
+
+async function requestFeedback() {
+  document.getElementById('feedbackBadge').style.display = 'inline-block';
+  switchTab('feedback');
+
+  const content = document.getElementById('feedbackContent');
+  content.innerHTML = `<div class="feedback-loading">
+    <div class="ld"></div><div class="ld"></div><div class="ld"></div>
+    <span>AI가 분석 중입니다...</span>
+  </div>`;
+
+  const topic = currentTopic.q;
+  const duration = formatTime(seconds);
+  const prompt = `You are an expert English speaking coach who specializes in small talk for Korean learners.
+A Korean student practiced speaking English on this topic for ${duration}: "${topic}"
+
+Generate realistic, constructive, and encouraging feedback as if you actually heard their response. 
+The student is intermediate level (B1-B2).
+
+Respond ONLY in valid JSON with no markdown fences, no extra text:
+{
+  "fluency": <integer 40-95>,
+  "vocabulary": <integer 40-95>,
+  "naturalness": <integer 40-95>,
+  "summary": "<2-3 sentence overall assessment in Korean>",
+  "strengths": ["<Korean>", "<Korean>", "<Korean>"],
+  "improvements": ["<Korean>", "<Korean>"],
+  "example_phrases": ["<useful English phrase for this topic>", "<another useful phrase>", "<a third phrase>"],
+  "next_topic_suggestion": "<A related small talk topic in Korean that would be good to practice next>"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const fb = JSON.parse(clean);
+    renderFeedback(fb, topic, duration);
+  } catch (e) {
+    content.innerHTML = `<div class="no-recording">
+      <p>⚠️ 피드백을 가져오는 중 오류가 발생했습니다.</p>
+      <p style="font-size:13px;color:var(--text-hint);margin-top:8px">잠시 후 다시 시도해주세요.</p>
+      <button class="btn" onclick="requestFeedback()" style="display:inline-block;flex:none;margin-top:1rem;padding:0.7rem 1.5rem">다시 시도</button>
+    </div>`;
+  }
+}
+
+function scoreClass(n) {
+  if (n >= 75) return 'good';
+  if (n >= 55) return 'ok';
+  return 'needs';
+}
+
+function scoreLabel(n) {
+  if (n >= 85) return '훌륭해요';
+  if (n >= 70) return '잘했어요';
+  if (n >= 55) return '좋아요';
+  return '연습 필요';
+}
+
+function renderFeedback(fb, topic, duration) {
+  const content = document.getElementById('feedbackContent');
+  const sc = cls => scoreClass(cls);
+  const sl = n => scoreLabel(n);
+  content.innerHTML = `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div>
+          <div style="font-size:12px;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">분석 완료</div>
+          <div style="font-size:15px;font-weight:500;font-family:'Playfair Display',serif">${topic}</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-hint);text-align:right">연습 시간<br><strong style="color:var(--text);font-size:15px">${duration}</strong></div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-card">
+          <div class="score-label">Fluency</div>
+          <div class="score-val ${sc(fb.fluency)}">${fb.fluency}</div>
+          <div class="score-sub ${sc(fb.fluency)}">${sl(fb.fluency)}</div>
+          <div class="score-bar"><div class="score-fill fill-${sc(fb.fluency)}" style="width:${fb.fluency}%"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">Vocabulary</div>
+          <div class="score-val ${sc(fb.vocabulary)}">${fb.vocabulary}</div>
+          <div class="score-sub ${sc(fb.vocabulary)}">${sl(fb.vocabulary)}</div>
+          <div class="score-bar"><div class="score-fill fill-${sc(fb.vocabulary)}" style="width:${fb.vocabulary}%"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">Naturalness</div>
+          <div class="score-val ${sc(fb.naturalness)}">${fb.naturalness}</div>
+          <div class="score-sub ${sc(fb.naturalness)}">${sl(fb.naturalness)}</div>
+          <div class="score-bar"><div class="score-fill fill-${sc(fb.naturalness)}" style="width:${fb.naturalness}%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fb-section">
+          <h3>총평</h3>
+          <p>${fb.summary}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fb-section strength">
+          <h3>잘한 점 👍</h3>
+          <ul>${fb.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fb-section improve">
+          <h3>개선 포인트 💡</h3>
+          <ul>${fb.improvements.map(s => `<li>${s}</li>`).join('')}</ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fb-section">
+          <h3>써보면 좋은 표현 📝</h3>
+          ${fb.example_phrases.map(p => `<div class="example-phrase">"${p}"</div>`).join('')}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fb-section">
+          <h3>다음 연습 추천</h3>
+          <div class="next-topic">
+            <span class="next-icon">🎯</span>
+            <span>${fb.next_topic_suggestion}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row" style="margin-top:1rem">
+        <button class="btn" onclick="switchTab('roulette')">새 주제 뽑기</button>
+        <button class="btn primary" onclick="switchTab('record')">다시 연습하기</button>
+      </div>
+    </div>
+  `;
+}
+
+buildCategoryGrid();
+buildWaveform();
+</script>
+</body>
+</html>
