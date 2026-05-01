@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmallTalk</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f9f7f4;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      text-align: center;
+      padding: 2rem;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 3rem;
+    }
+
+    .topic-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .topic-emoji {
+      font-size: 2.5rem;
+      line-height: 1;
+    }
+
+    .topic-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bbb;
+    }
+
+    .topic-text {
+      font-size: 1.4rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: #1a1a1a;
+    }
+
+    button {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 0.85rem 2.25rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .step {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .step.active { display: flex; }
+
+    .hint {
+      font-size: 1rem;
+      color: #666;
+      line-height: 1.6;
+      max-width: 360px;
+    }
+
+    .row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: #1a1a1a;
+      border: 2px solid #1a1a1a;
+    }
+
+    .btn-outline:hover { background: #f0f0f0; }
+
+    .btn-stop {
+      background: #e05252;
+      border: none;
+    }
+
+    .btn-stop:hover { background: #c94444; }
+
+    .timer {
+      font-size: 3rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #e05252;
+    }
+
+    .feedback {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: left;
+    }
+
+    .fb-positive {
+      background: #f0faf0;
+      color: #2a6a2a;
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .fb-suggestion {
+      background: #fdf8ed;
+      color: #7a5a1a;
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .transcript {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #333;
+      text-align: left;
+      width: 100%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SmallTalk</h1>
+
+    <!-- Step 1: Topic -->
+    <div class="step active" id="step1">
+      <div class="topic-card">
+        <div class="topic-emoji" id="emoji"></div>
+        <div class="topic-label" id="category"></div>
+        <div class="topic-text" id="topic"></div>
+      </div>
+      <div class="row">
+        <button class="btn-outline" onclick="newTopic()">New Topic</button>
+        <button onclick="goTo(2)">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Prepare -->
+    <div class="step" id="step2">
+      <div class="topic-card">
+        <div class="topic-emoji" id="emoji2"></div>
+        <div class="topic-text" id="topic2"></div>
+      </div>
+      <p class="hint">Take a breath. Speak naturally for 1 minute on this topic.<br><small style="color:#aaa; font-size:0.85em;">Speak clearly and not too quietly.</small></p>
+      <button onclick="startRecording()">Start Speaking</button>
+    </div>
+
+    <!-- Step 3: Speaking -->
+    <div class="step" id="step3">
+      <div class="timer" id="timer">1:00</div>
+      <div class="status">Recording</div>
+      <button class="btn-stop" onclick="stopRecording()">Stop</button>
+    </div>
+
+    <!-- Step 4: Result -->
+    <div class="step" id="step4">
+      <p class="hint">Here's what you said:</p>
+      <p id="transcript" class="transcript"></p>
+      <div id="feedback" class="feedback">
+        <p id="fb-positive" class="fb-positive"></p>
+        <p id="fb-suggestion" class="fb-suggestion"></p>
+      </div>
+      <div class="row">
+        <button class="btn-outline" onclick="newTopic(); goTo(1)">New Topic</button>
+        <button onclick="goTo(2)">Go Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const topics = [
+      { emoji: "☀️", category: "Weather", text: "Has the weather been what you expected lately?" },
+      { emoji: "🌧️", category: "Weather", text: "Do you prefer rainy days or sunny days?" },
+      { emoji: "🍕", category: "Food", text: "Have you tried any good restaurants recently?" },
+      { emoji: "🍳", category: "Food", text: "Do you enjoy cooking at home?" },
+      { emoji: "✈️", category: "Travel", text: "Is there a place you've always wanted to visit?" },
+      { emoji: "🗺️", category: "Travel", text: "What's the best trip you've ever taken?" },
+      { emoji: "🎮", category: "Hobbies", text: "What do you like to do to unwind?" },
+      { emoji: "📚", category: "Hobbies", text: "Are you reading anything interesting right now?" },
+      { emoji: "🎵", category: "Hobbies", text: "Have you been to any concerts or shows lately?" },
+      { emoji: "🏃", category: "Hobbies", text: "Do you have a go-to way to stay active?" },
+      { emoji: "🛋️", category: "Weekend", text: "Do you have anything fun planned for the weekend?" },
+      { emoji: "😴", category: "Weekend", text: "Are you more of a stay-in or go-out kind of person on weekends?" },
+      { emoji: "💼", category: "Work", text: "How long have you been in your current field?" },
+      { emoji: "🏠", category: "Work", text: "Do you work from home or go into an office?" },
+      { emoji: "🐶", category: "Pets", text: "Do you have any pets?" },
+      { emoji: "🌱", category: "Hobbies", text: "Have you picked up any new hobbies lately?" },
+      { emoji: "📺", category: "Entertainment", text: "Are you watching anything good these days?" },
+      { emoji: "☕", category: "Food", text: "Are you more of a coffee or tea person?" },
+      { emoji: "🏙️", category: "Local", text: "How long have you lived around here?" },
+      { emoji: "🎉", category: "Plans", text: "Anything exciting coming up for you soon?" },
+    ];
+
+    let lastIndex = -1;
+
+    function newTopic() {
+      let index;
+      do { index = Math.floor(Math.random() * topics.length); } while (index === lastIndex);
+      lastIndex = index;
+      const t = topics[index];
+      document.getElementById("emoji").textContent = t.emoji;
+      document.getElementById("category").textContent = t.category;
+      document.getElementById("topic").textContent = t.text;
+    }
+
+    newTopic();
+
+    let recorder = null;
+    let timerInterval = null;
+    let recognition = null;
+    let recognizedText = '';
+    let shouldRecognize = false;
+
+    function formatTime(s) {
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    }
+
+    function goTo(n) {
+      document.querySelectorAll('.step').forEach((el, i) => {
+        el.classList.toggle('active', i + 1 === n);
+      });
+      if (n === 2) {
+        document.getElementById("emoji2").textContent = document.getElementById("emoji").textContent;
+        document.getElementById("topic2").textContent = document.getElementById("topic").textContent;
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        recorder = new MediaRecorder(stream);
+        recorder.start();
+        recorder.onstop = () => stream.getTracks().forEach(t => t.stop());
+
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SR) {
+          recognition = new SR();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognizedText = '';
+          shouldRecognize = true;
+          recognition.onresult = (e) => {
+            recognizedText = Array.from(e.results).map(r => r[0].transcript).join(' ');
+          };
+          // restart automatically if browser ends recognition mid-session (e.g. after silence)
+          recognition.onend = () => { if (shouldRecognize) recognition.start(); };
+          recognition.onerror = (e) => { if (e.error === 'not-allowed') alert('Microphone access denied.'); };
+          recognition.start();
+        }
+
+        goTo(3);
+        let secondsLeft = 60;
+        document.getElementById("timer").textContent = formatTime(secondsLeft);
+        timerInterval = setInterval(() => {
+          secondsLeft--;
+          document.getElementById("timer").textContent = formatTime(secondsLeft);
+          if (secondsLeft <= 0) stopRecording();
+        }, 1000);
+      } catch {
+        alert("Microphone access denied.");
+      }
+    }
+
+    function generateFeedback(text) {
+      const words = text.trim().split(/\s+/).filter(Boolean);
+      const wordCount = words.length;
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const fillerWords = ['um','uh','like','you know','basically','literally','actually'];
+      const fillerCount = fillerWords.reduce((n, f) => n + (text.toLowerCase().split(f).length - 1), 0);
+      const uniqueRatio = new Set(words.map(w => w.toLowerCase().replace(/[^a-z]/g, ''))).size / Math.max(wordCount, 1);
+      const avgLen = wordCount / Math.max(sentences.length, 1);
+
+      let positive, suggestion;
+
+      if (wordCount >= 80)         positive = "Great job keeping the conversation going!";
+      else if (fillerCount === 0 && wordCount > 20) positive = "Your speech sounded natural and fluent.";
+      else if (sentences.length >= 4) positive = "Nice variety across your sentences.";
+      else if (wordCount >= 40)    positive = "Good effort — you covered the topic well.";
+      else                         positive = "You gave it a go — that's what matters!";
+
+      if (wordCount < 30)          suggestion = "Try to speak more — aim for longer, fuller answers.";
+      else if (fillerCount >= 4)   suggestion = "Watch filler words like 'um' and 'uh' — try pausing instead.";
+      else if (avgLen < 6)         suggestion = "Try using longer sentences to develop your ideas more.";
+      else if (uniqueRatio < 0.5)  suggestion = "Try varying your vocabulary a bit more.";
+      else                         suggestion = "Keep practising to build fluency and natural flow.";
+
+      return { positive, suggestion };
+    }
+
+    function stopRecording() {
+      if (recorder) { recorder.stop(); recorder = null; }
+      shouldRecognize = false;
+      if (recognition) { recognition.stop(); recognition = null; }
+      clearInterval(timerInterval);
+
+      const text = recognizedText || '';
+      document.getElementById("transcript").textContent = text || "No speech detected.";
+
+      if (text) {
+        const { positive, suggestion } = generateFeedback(text);
+        document.getElementById("fb-positive").textContent = "✓ " + positive;
+        document.getElementById("fb-suggestion").textContent = "→ " + suggestion;
+        document.getElementById("feedback").style.display = "flex";
+      } else {
+        document.getElementById("feedback").style.display = "none";
+      }
+
+      goTo(4);
+    }
+  </script>
+</body>
+</html>
